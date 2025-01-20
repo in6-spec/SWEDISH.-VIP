@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Betting Page</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+      color: #333;
+      text-align: center;
+    }
+
+    header {
+      background-color: #333;
+      color: #fff;
+      padding: 1rem;
+      text-align: center;
+    }
+
+    nav {
+      background-color: #6200ea;
+      padding: 10px;
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+    }
+
+    nav a {
+      color: white;
+      text-decoration: none;
+      font-size: 1rem;
+      padding: 10px;
+    }
+
+    nav a:hover {
+      text-decoration: underline;
+    }
+
+    .horse-buttons {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    button {
+      padding: 15px 20px;
+      font-size: 1.2rem;
+      cursor: pointer;
+      background-color: #6200ea;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      width: 90%;
+      max-width: 300px;
+    }
+
+    .result, .calculation, .waiting-message, #bet-status {
+      font-size: 1.2rem;
+      margin-top: 20px;
+    }
+
+    footer {
+      background-color: #333;
+      color: #fff;
+      padding: 1rem;
+      text-align: center;
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+    }
+
+    @media (max-width: 768px) {
+      button {
+        font-size: 1rem;
+        padding: 12px;
+      }
+
+      nav {
+        flex-wrap: wrap;
+      }
+
+      nav a {
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Bet on the Race</h1>
+  </header>
+
+  <nav>
+    <a href="profile.html">Profile</a>
+    <a href="deposit.html">Deposit</a>
+    <a href="withdraw.html">Withdraw</a>
+  </nav>
+
+  <main>
+    <h2>Select the Winning Horse</h2>
+    <p id="bet-status"></p>
+    <div class="horse-buttons" id="horse-buttons"></div>
+
+    <p class="waiting-message" id="waiting-message"></p>
+    <p class="result" id="bet-result"></p>
+    <p class="calculation" id="calculation"></p>
+  </main>
+
+  <footer>
+    <p>&copy; 2005 Horse Betting</p>
+  </footer>
+
+  <script>
+    const horseNames = [
+      "Thunderbolt", "Lightning Strike", "Shadow Runner", "Golden Hoof", "Speedster", 
+      "Midnight Star", "Storm Chaser", "Blazing Fury", "Silver Mane", "Desert Wind"
+    ];
+
+    function generateHorses() {
+      const numHorses = Math.floor(Math.random() * (10 - 5 + 1)) + 5;
+      const shuffledHorses = horseNames.sort(() => 0.5 - Math.random()).slice(0, numHorses);
+      const horseButtonsDiv = document.getElementById("horse-buttons");
+      horseButtonsDiv.innerHTML = "";  
+
+      shuffledHorses.forEach(horse => {
+        const button = document.createElement("button");
+        button.textContent = horse;
+        button.onclick = () => placeBet(horse);
+        horseButtonsDiv.appendChild(button);
+      });
+
+      checkBetStatus();
+    }
+
+    function checkBetStatus() {
+      const lastBetTime = localStorage.getItem("lastBetTime");
+      const betStatus = document.getElementById("bet-status");
+      const horseButtons = document.querySelectorAll(".horse-buttons button");
+
+      if (lastBetTime) {
+        const timeSinceLastBet = Date.now() - parseInt(lastBetTime);
+        const hoursSinceLastBet = timeSinceLastBet / (1000 * 60 * 60);
+
+        if (hoursSinceLastBet < 24) {
+          betStatus.innerHTML = `You can bet again in ${Math.ceil(24 - hoursSinceLastBet)} hours.`;
+          horseButtons.forEach(button => button.disabled = true);
+        }
+      }
+    }
+
+    function placeBet(selectedHorse) {
+      const lastBetTime = localStorage.getItem("lastBetTime");
+
+      if (lastBetTime) {
+        const timeSinceLastBet = Date.now() - parseInt(lastBetTime);
+        if (timeSinceLastBet < 24 * 60 * 60 * 1000) {
+          document.getElementById('bet-status').textContent = "You can only bet once every 24 hours.";
+          return;
+        }
+      }
+
+      localStorage.setItem("lastBetTime", Date.now());
+
+      document.getElementById('waiting-message').textContent = "Bet placed! The result will be revealed in a few hours...";
+      document.getElementById('bet-result').textContent = "";
+      document.getElementById('calculation').textContent = "";
+
+      const delay = (Math.floor(Math.random() * (12 - 4 + 1)) + 4) * 60 * 60 * 1000;
+
+      setTimeout(() => {
+        const resultText = document.getElementById('bet-result');
+        const calculationText = document.getElementById('calculation');
+
+        resultText.textContent = `Congratulations! ${selectedHorse} won. Your balance has increased by 5% after tax deduction.`;
+
+        let currentBalance = parseFloat(localStorage.getItem('balance')) || 0;
+        let grossWinnings = currentBalance * 0.05;
+        let tax = grossWinnings * 0.005;
+        let netWinnings = grossWinnings - tax;
+        let newBalance = currentBalance + netWinnings;
+
+        calculationText.innerHTML = `
+          <strong>Calculation:</strong><br>
+          Gross Profit: ${currentBalance} × 5% = ${grossWinnings.toFixed(2)} KES<br>
+          Tax Deduction: ${grossWinnings.toFixed(2)} × 0.5% = ${tax.toFixed(2)} KES<br>
+          Net Profit After Tax: ${grossWinnings.toFixed(2)} - ${tax.toFixed(2)} = ${netWinnings.toFixed(2)} KES<br>
+          New Balance: ${currentBalance} + ${netWinnings.toFixed(2)} = ${newBalance.toFixed(2)} KES
+        `;
+
+        localStorage.setItem('balance', newBalance.toFixed(2));
+      }, delay);
+    }
+
+    window.onload = generateHorses;
+  </script>
+</body>
+  </html>
+  
