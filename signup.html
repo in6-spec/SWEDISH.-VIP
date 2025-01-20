@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign Up</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+      color: #333;
+    }
+
+    header {
+      background-color: #333;
+      color: #fff;
+      padding: 1rem;
+      text-align: center;
+    }
+
+    main {
+      padding: 2rem;
+      text-align: center;
+    }
+
+    form {
+      margin: auto;
+      width: 50%;
+    }
+
+    form input {
+      display: block;
+      width: 100%;
+      margin: 10px 0;
+      padding: 10px;
+      font-size: 1rem;
+    }
+
+    footer {
+      background-color: #333;
+      color: #fff;
+      padding: 1rem;
+      text-align: center;
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+    }
+
+    .link {
+      margin-top: 10px;
+    }
+
+    /* Popup styles */
+    .popup {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      visibility: hidden;
+    }
+
+    .popup-content {
+      background-color: white;
+      padding: 20px;
+      border-radius: 5px;
+      text-align: center;
+    }
+
+    .popup.show {
+      visibility: visible;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Sign Up</h1>
+  </header>
+
+  <main>
+    <form id="signup-form">
+      <h2>Create an Account</h2>
+      <input type="text" id="username" placeholder="Enter Username" required>
+      <input type="password" id="password" placeholder="Enter Password" required>
+      <input type="password" id="confirm-password" placeholder="Confirm Password" required>
+      <input type="text" id="referral-code" placeholder="Enter Referral Code (Optional)">
+      <button type="button" id="signup-button">Sign Up</button>
+    </form>
+    <p class="link">Already have an account? <a href="login.html">Log in here</a>.</p>
+  </main>
+
+  <footer>
+    <p>&copy; 2005 Horse Betting</p>
+  </footer>
+
+  <!-- Popup -->
+  <div id="signup-popup" class="popup">
+    <div class="popup-content">
+      <h3>Account Successfully Created!</h3>
+      <p>Welcome to the platform. You can now log in and start using your account.</p>
+      <button onclick="closePopup()">Close</button>
+    </div>
+  </div>
+
+  <script>
+    // Check if the user has already signed up
+    if (localStorage.getItem('username')) {
+      window.location.href = 'index.html'; // Redirect to index page if already signed up
+    }
+
+    document.getElementById('signup-button').addEventListener('click', () => {
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirm-password').value;
+      const referralCode = document.getElementById('referral-code').value.trim(); // Optional field
+
+      if (!username || !password || !confirmPassword) {
+        alert('All fields except the referral code are required.');
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        alert('Passwords do not match.');
+        return;
+      }
+
+      // Store user data and prevent re-signup
+      localStorage.setItem('username', username);
+      localStorage.setItem('balance', 0); // No balance added
+      if (referralCode) {
+        localStorage.setItem('referralCodeUsed', referralCode); // Store referral code if provided
+      }
+
+      alert('Account successfully created!');
+      
+      // Show the popup after successful signup
+      if (!localStorage.getItem('hasShownPopup')) {
+        document.getElementById('signup-popup').classList.add('show');
+        localStorage.setItem('hasShownPopup', 'true'); // Prevent popup from showing again
+      }
+
+      // Redirect to index page
+      window.location.href = 'index.html'; 
+    });
+
+    function closePopup() {
+      document.getElementById('signup-popup').classList.remove('show');
+    }
+  </script>
+</body>
+  </html>
+    
